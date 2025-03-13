@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+
+# Learn more about building a configuration: https://promptfoo.dev/docs/configuration/guide
+
+description: 'Test promptfoo'
+prompts:
+  - id: file:D:\FourthSemester\AiApps\AiLLMFirst\TestPrompts\Testing.json
+    label: qwen2.5-coder_prompt
+
+providers:
+  - 'ollama:codellama:7b'
+  - 'ollama:qwen2.5-coder'
+  - 'ollama:llama3.2:latest'
+
+config: -id:'ollama:completion:llama3.2'
+method: 'POST'
+responseParser: 'json.choices[0].text'
+headers:
+  'accept': 'application/json'
+  'Content-Type': 'application/json'
+  body:
+  prompt: '{{prompt}'
+  model: 'llama3.2:latest'
+tests:
+  - vars:
+      topic: bananas
+
+  - vars:
+      topic: avocado toast
+    assert:
+      # For more information on assertions, see https://promptfoo.dev/docs/configuration/expected-outputs
+
+      # Make sure output contains the word "avocado"
+      - type: icontains
+        value: avocado
+
+      # Prefer shorter outputs
+      - type: javascript
+        value: 1 / (output.length + 1)
+
+  - vars:
+      topic: new york city
+    assert:
+      # For more information on model-graded evals, see https://promptfoo.dev/docs/configuration/expected-outputs/model-graded
+      - type: llm-rubric
+        value: ensure that the output is funny
