@@ -1,13 +1,15 @@
 import flet as ft
 
-class CodeWidget(ft.Column):
+class CodeWidget(ft.Container):
     def __init__(self, value, language, page):
         super().__init__()
         self.page = page  
         self.value = value  
         self.language = language 
-      
-        self.header = ft.Row(
+
+        self.header =ft.Container(
+             content=     
+        ft.Row(
             controls=[
                 ft.Text(f"{self.language} Code", weight=ft.FontWeight.BOLD, size=16, color=ft.colors.WHITE),
                 ft.ElevatedButton(
@@ -19,8 +21,13 @@ class CodeWidget(ft.Column):
                 ),
             ],
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-        )
-
+            
+        ),
+        bgcolor=ft.colors.GREY_900,
+        border_radius = ft.border_radius.only(10,10,0,0),
+        padding=ft.padding.symmetric(horizontal=15, vertical=10)  
+        ) 
+    
         self.code_field = ft.TextField(
             value=self.value,
             multiline=True,
@@ -28,16 +35,23 @@ class CodeWidget(ft.Column):
             label="Generated Code",
             border_color=ft.colors.BLUE,
             cursor_color=ft.colors.WHITE,
-            bgcolor=ft.colors.BLACK,
-            color=ft.colors.WHITE,
-            width=600,  
+            bgcolor=ft.colors.GREY_700,
+            color=ft.colors.WHITE,  
             height=300, 
             text_align=ft.TextAlign.LEFT,
             border="none"
         )
-
-  
-        self.controls = [self.header, self.code_field]
+     
+        self.margin=30 
+        self.border = ft.border.all(2, ft.colors.BLACK)  
+        self.border_radius = ft.border_radius.all(10) 
+        self.bgcolor = ft.colors.GREY_700
+        self.content =  ft.Column(
+            controls=[self.header,self.code_field],
+            alignment=ft.MainAxisAlignment.CENTER,
+        )
+        self.height=300
+        
 
 
     def copy_code(self, e):

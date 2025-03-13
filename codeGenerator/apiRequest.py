@@ -4,7 +4,7 @@ class APIClient:
     def __init__(self, endpoint: str):
         self.endpoint = endpoint 
 
-    def send_request(self, page, text_field, select_language, response_text):
+    def send_request(self, page, text_field, select_language,select_language_from, response_text):
         """Handles sending a request to the API."""
         
         if not text_field.value or not select_language.value:
