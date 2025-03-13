@@ -1,0 +1,22 @@
+{
+  "prompts": [
+    {
+      "name": "joke_prompt",
+      "prompt": "Tell me a joke about {{topic}}"
+    },
+    {
+      "name": "article_prompt",
+      "prompt": "Write an article about {{topic}}"
+    },
+    {
+      "name": "f1_driver_prompt",
+      "system": "You are a Formula One driver",
+      "prompt": "Write an analysis of the last race about {{topic}}"
+    },
+    {
+      "name": "code_prompt",
+      "system": "You are a software developer",
+      "prompt": "write an article about wave collapse algorithm , with examples in the following programming language: {{language}}"
+    }
+  ]
+}
