@@ -2,22 +2,22 @@
 import flet as ft
 import requests
 from view.codeWodget import CodeWidget  
+from view.questionWidget import QuestionWidget
 class InputMessage(ft.Container):
     def __init__(self, placeholder: str, optionsLang: list[str],optionAct:list[str],responseDisplay,page):
         super().__init__()
         self.action=""
         self.responseDisplay=responseDisplay
         self.page=page
-        self.max_height=180
-        self.min_height=150
-        self.newHight=70
+        self.max_height=300
+        self.min_height=200
         self.char_per_line =44
-        self.height=self.min_height
         self.padding=4
+        self.input=""
         self.text_field = ft.TextField(
             label=placeholder,
-            width=400,
-            height=70,
+            width=600,
+            height=200,
             multiline=True,
             color="white",
             border="none",
@@ -52,7 +52,7 @@ class InputMessage(ft.Container):
         )
      
         self.submit_button = ft.ElevatedButton("Submit", 
-                                                on_click=lambda e: self.sendGenerateCode(self.text_field.value, self.select_language.value,self.responseDisplay,self.page),
+                                                on_click=lambda e: self.requestServer(self.action,self.input, self.select_language.value,self.select_language_from.value),
                                                 width=300)
         self.border=ft.border.all(2, ft.Colors.BLACK)
         self.border_radius=ft.border_radius.all(10)
@@ -65,8 +65,6 @@ class InputMessage(ft.Container):
             expand=1 
         )
         
-
-       
         right_column = ft.Column(
             controls=[ft.Container(content=self.text_field, expand=True)],
             expand=3  
@@ -98,38 +96,21 @@ class InputMessage(ft.Container):
     
     def adjust_size(self, e):
         text = self.text_field.value
+        self.input=self.text_field.value
         num_lines = (len(text) // self.char_per_line) + 1  
         new_height = min(self.min_height + (num_lines * 20), self.max_height)  
-        self.height = new_height
         self.text_field.height=new_height
-        self.newHight=new_height
         self.update()
 
-    def sendRequest(self):
-        
-        if not self.action:
-            self.showSnack(self.page, "Please choose an action")
-            return
-        
-        value = self.text_field.value
-        language = self.select_language.value
-        language_from = self.select_language_from.value
-
-        if self.action == "Generate Code":
-            self.sendGenerateCode(value, language, self.responseDisplay, self.page)
-        elif self.action == "Translate Code":
-            self.sendTranslateCode(value, language, language_from, self.responseDisplay, self.page)
-        else:
-            self.showSnack(self.page, "Invalid action selected")
-
     
-
-    
-    def sendGenerateCode(self,value, language,responseDisplay,page):
+    # send request to the server to process the code generation user input
+    def sendGenerateCode(self,value, language):
         """Handles sending the request to the backend API and displaying response."""
         print(self.action)
-        error =self.showError(value,language,page)    
+        error =self.showErrorGenerate(value,language,self.page)    
         if error:return
+        self.appendQuestion(value)
+
         try:
             res = requests.post(
                 "http://localhost:8080/generateCode",
@@ -138,71 +119,118 @@ class InputMessage(ft.Container):
             data = res.json()
             language = data.get('language', 'No response')
             code = data.get('response', 'No response')
-
-            
-            responsewidget = CodeWidget(code, language, page)
-            responseDisplay.controls.append(responsewidget)
-            page.update()
-
+            self.displayResponse(code,language)
         except Exception as ex:
-            errorWidget = CodeWidget("Error", str(ex), page)
-            responseDisplay.controls.append(errorWidget)
-            page.update()
-    def showError(self,inputValue,language,page):
-        
-        if not inputValue :
-            self.showSnack(page,"Please enter a value")
-            return True
-        if not language:
-            self.showSnack(page,"Please select a language")
-            return True         
-        return False     
+            self.displayResponse(str(ex),"Error")
+
     
-    def sendTranslateCode(self,value, language, LanguageFrom, responseDisplay,page):
+
+    # send request to the server to process the code translation user input
+    def sendTranslateCode(self,value, language, LanguageFrom):
         """Handles sending the request to the backend API and displaying response."""
         print(self.action)
-        error =self.showError(value,language,page)    
+        error =self.showErrorTranslate(value,language,self.page)    
         if error:return
+        self.appendQuestion(value)
         try:
             res = requests.post(
-                "http://localhost:8080/TranslateCode",
-                json={"description": value, "language": language,"languageFrom": LanguageFrom },
+                "http://localhost:8080/translate",
+                json={ "source_language": language, "target_language": LanguageFrom,"code": value },
             )
             data = res.json()
             language = data.get('language', 'No response')
             code = data.get('response', 'No response')
-
+            self.displayResponse(code,language)
             
-            responsewidget = CodeWidget(code, language, page)
-            responseDisplay.controls.append(responsewidget)
-            page.update()
+        except Exception as ex:
+            self.displayResponse(str(ex),"Error")
+
+    #send request to server to explain code
+    def sendExplainCode(self,value):
+        if not value :
+            self.showSnack(self.page,"Please enter a value")
+            return
+        self.appendQuestion(value)
+        
+        try:
+            res = requests.post(
+                "http://localhost:8080/explain_code",
+                json={"code": value},
+            )
+            data = res.json()
+            language = data.get('language', 'No response')
+            code = data.get('response', 'No response')
+            self.displayResponse(code,language)
+          
 
         except Exception as ex:
-            errorWidget = CodeWidget("Error", str(ex), page)
-            responseDisplay.controls.append(errorWidget)
-            page.update()
+            self.displayResponse(str(ex),"Error")
 
-    def showError(self,inputValue,language,page):
-
+    # show error if an action is not selected     
+    def selectAnActionError(self,page):
+        if  self.action=="":
+            self.showSnack(page,"Please select an action, translate, generate, explain")
+            return True
+    # show input error for the generate code request method
+    def showErrorGenerate(self,inputValue,language,page):
         if not inputValue :
             self.showSnack(page,"Please enter a value")
             return True
         if not language:
             self.showSnack(page,"Please select a language")
             return True         
-        return False     
+        return False
        
 
-        
+    # show input error for the translate code request method
+    def showErrorTranslate(self,inputValue,language,page):
+        if not inputValue :
+            self.showSnack(page,"Please enter a value")
+            return True
+        if not language:
+            self.showSnack(page,"Please select a language")
+            return True         
+        return False 
+    # display the received response from the server
+    def displayResponse(self, code, language):
+      
+        response_widget = CodeWidget(code, language, self.page)
+        self.responseDisplay.controls.append(response_widget)
+        self.page.update()
+    # append user input to the send container
+    def appendQuestion(self,value):
+        self.text_field.value=""
+        self.input=""
+        question_widget = QuestionWidget(value)
+        self.responseDisplay.controls.append(question_widget)
+        self.page.update()
+         
     def showSnack(self,page,message):
          page.open(ft.SnackBar(
                     content=ft.Text(message, color="white"),
                     bgcolor="pink",
                     duration=2000  
         ))
-         
+    # set the selected action     
     def on_action_selected(self,e):
         self.action = self.select_action.value 
         print(self.select_action.value)
         self.showSnack(self.page, f"Selected Language: {self.action}")  
         self.page.update()
+
+    # function definition that sends requests to server bassed on the chosen action
+    def requestServer(self,action,value,language,languageFrom):
+        no_action=self.selectAnActionError(self.page)
+        if no_action: return
+        match action:
+            case "/generate_code":
+                self.sendGenerateCode(value,language)
+            case "/explain_code":
+                self.sendExplainCode(value)
+            case "/translate_code":
+                self.sendTranslateCode(value,language,languageFrom)
+            case "C++":
+                return "You chose C++!"
+            case _:
+                return "Invalid language"   
+               

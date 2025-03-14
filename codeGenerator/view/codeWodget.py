@@ -37,7 +37,6 @@ class CodeWidget(ft.Container):
             cursor_color=ft.colors.WHITE,
             bgcolor=ft.colors.GREY_700,
             color=ft.colors.WHITE,  
-            height=300, 
             text_align=ft.TextAlign.LEFT,
             border="none"
         )
@@ -50,7 +49,7 @@ class CodeWidget(ft.Container):
             controls=[self.header,self.code_field],
             alignment=ft.MainAxisAlignment.CENTER,
         )
-        self.height=300
+        
         
 
 

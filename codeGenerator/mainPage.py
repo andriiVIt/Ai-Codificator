@@ -7,7 +7,8 @@ def main(page: ft.Page):
     page.bgcolor = "#1E1E2E"  # Dark background for a modern UI
     page.padding = 20
     page.scroll = "adaptive"
-
+    controllHeight=page.height-400
+    controllWidth = page.width-400 
 
     header = ft.Text(
         "AI Code Generator",
@@ -17,12 +18,13 @@ def main(page: ft.Page):
         height=100
     )
 
- 
+    print(page.height)
     responseDisplay = ft.Column(
         alignment=ft.MainAxisAlignment.START,
         spacing=10,
-        width=700,
-        height= page.height - 250,
+        width=controllWidth,
+        height= controllHeight,
+        auto_scroll=True,
         scroll=True,
         expand=True
     )
@@ -40,6 +42,16 @@ def main(page: ft.Page):
         responseDisplay,
         page
     )
+
+    page.on_resized = lambda e: update_layout(e, responseDisplay)
+
+    def update_layout(e,responseLayout):
+        controllHeight = page.height - 400
+        controllWidth = page.width-400
+        responseLayout.height=controllHeight
+        responseLayout.width= controllWidth
+        responseLayout.update()  
+        page.update()
 
     # Page Layout
     page.add(

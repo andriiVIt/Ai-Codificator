@@ -16,13 +16,13 @@ class CodeTranslator:
             Translated Code:"""
         )
 
-        self.supported_languages = ["Python", "Java", "JavaScript", "C++"]
+        self.supported_languages = ["Python", "Java", "JavaScript", "C++","C#","TypeScript"]
 
     def translate_code(self, source_language: str, target_language: str, code: str) -> str:
         """Translates code between languages using the model."""
         
         if source_language not in self.supported_languages or target_language not in self.supported_languages:
-            raise HTTPException(status_code=400, detail="Both source and target languages must be one of: Python, Java, JavaScript, C++.")
+            raise HTTPException(status_code=400, detail="Both source and target languages must be one of: Python, Java, JavaScript, C++,C#,TypeScript.")
 
         chain = self.code_translation_prompt | self.llm
 
