@@ -3,10 +3,11 @@ from pydantic import BaseModel, Field
 from ollama import Client  
 from CodeGenerator import CodeGenerator
 from CodeTranslator import CodeTranslator
-from explain_code import LanguageRecognition
+from explain_code import ExplainCode
+from langchain.agents import initialize_agent, AgentType
 import json
 app = FastAPI()
-
+   
 # Define request model
 class Prompt(BaseModel):
     language: str
@@ -25,11 +26,14 @@ class RequestData(BaseModel):
 class ExplainRequestData(BaseModel):
     code: str 
 
+
 @app.post("/generateCode", response_model=ResponseModel)
 async def translateItem(item: Prompt):
     try:
-        codeGenerator = CodeGenerator()  
-        generated_code = codeGenerator.generate_code(item.language, item.description)
+
+     
+        codeGenerator = CodeGenerator() 
+        generated_code = codeGenerator.generate_code(item.language,item.description)
         return ResponseModel(response=generated_code.get("output"),language=item.language)
  
 #        code_string = "\n".join([f"print('This is line {i + 1}')" for i in range(100)])
@@ -62,8 +66,8 @@ async def explain_code(data: ExplainRequestData):
     Receives a code snippet in the request body, automatically detects its programming language,
     and returns a detailed explanation that takes into account the specific language and context.
     """
-    languageRecognition = LanguageRecognition()
-    response = languageRecognition.explainCode(data)
+    languageRecognition =ExplainCode()
+    response = languageRecognition.explain_code(data)
     return response
 
 if __name__ == '__main__':

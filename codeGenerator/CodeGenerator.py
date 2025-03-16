@@ -7,63 +7,64 @@ from langchain.agents import initialize_agent, AgentType
 class CodeGenerator:
     def __init__(self):
         self.model = OllamaLLM(model="qwen2.5-coder:latest" , temperature=0) 
-        # self.example_prompt = ChatPromptTemplate.from_template("""
-        # You are an expert software engineer. Generate well-structured, clean, and maintainable {{language}} code 
-        # based on the description provided. Use best practices, including SOLID principles, DRY, and KISS.
+        self.example_prompt = ChatPromptTemplate.from_template("""
+        You are an expert software engineer. Generate well-structured, clean, and maintainable {language} code 
+        based on the description provided. Use best practices, including SOLID principles, DRY, and KISS.
 
-        # ### Example 1:
-        # **Language:** Python  
-        # **Description:** Write a function to check if a number is even or odd.  
-        # **Output:**
-        # ```
-        # def is_even(n):
-        #     return n % 2 == 0
-        # ```
+        ### Example 1:
+        **Language:** Python  
+        **Description:** Write a function to check if a number is even or odd.  
+        **Output:**
+        ```
+        def is_even(n):
+            return n % 2 == 0
+        ```
 
-        # ### Example 2:
-        # **Language:** JavaScript  
-        # **Description:** Create a function that returns the square of a number.  
-        # **Output:**
+        ### Example 2:
+        **Language:** JavaScript  
+        **Description:** Create a function that returns the square of a number.  
+        **Output:**
        
-        # ```
-        # function square(n) {{
-        #     return n * n;
-        # }}
-        # ```
+        ```
+        function square(n) 
+            return n * n;
+        ```
 
-        # ### Now generate code for the following:
+        ### Now generate code for the following:
 
-        # **Language:** {{language}}  
-        # **Description:** {{description}}  
-        # **Output:**
-        # """)
+        **Language:** {language} 
+        **Description:** {description} 
+        **Output:**
+        """)
 
         self.code_generation_prompt = PromptTemplate(
-            input_variables=["language", "description"],
+          input_variables=["generated_code"],
             template="""
-             Act as a Developer
-             The code should be consistent, deploy the same architecture and style throughout the solution.
-             Align with SOLID principles.
-             Write code as simple as possible: KISS.
-             Avoid repetition: DRY.
-             Delete what is not needed: YAGNI.
-             Prefer small methods, with 0-1 argument, having max 2 arguments when necessary reasonable.
-             The code should be consistent, deploy the same architecture and style throughout the project.
-             The code solution should be followed by a description of why this is the chosen solution and you must also provide pros and cons for the solution together with a description of the limitations in the suggestion solution and how it might be optimized.
-             Generate a clean, efficient, and well-commented {{language}}
-             program based on the following description:  {{description}}
+            Act as a Senior Developer reviewing this code.
+            Analyze and improve the solution using best practices.
+            Identify pros and cons, potential optimizations, and scalability concerns.
+            Ensure:
+            - SOLID principles
+            - Simplicity (KISS)
+            - No redundancy (DRY)
+            - Necessary components only (YAGNI)
+            
+            Given code:
+            ```
+            {generated_code}
+            ```
+            Provide improvements and explanation together with the given code:
             """
         )
 
-      
 
-        self.code_generation_chain = self.example_prompt|self.code_generation_prompt|self.model
+        self.code_generation_chain  = self.example_prompt|self.model
+        self.code_generation_check= self.code_generation_prompt|self.model
 
-       
         self.code_generation_tool = Tool(
             name="CodeGenerator",
             func=self.generate_code_tool, 
-            description="Generates code in a provided programming language and a description.",
+            description="Generates code in a provided programming language and  a description. Arguments: language (str), description (str)." ,
             args_schema=None 
         )
 
@@ -76,12 +77,14 @@ class CodeGenerator:
         )
 
     def generate_code_tool(self, inputs):
+        print(inputs + "printing inputs")
         if isinstance(inputs, str):
             inputs = {"language": inputs, "description": inputs}
 
-        return self.code_generation_chain.invoke(
+        generated_code= self.code_generation_chain.invoke(
             {"language": inputs["language"], "description": inputs["description"]}
         )
+        return self.code_generation_check.invoke({"generated_code":generated_code})
 
     def generate_code(self, language, description):
         structured_input = {
