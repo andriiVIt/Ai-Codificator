@@ -25,7 +25,7 @@ To install and run the project, follow these steps:
 
 ### 1. Clone the Repository
 ```sh
-git clone https://github.com/andriiVIt/Ai-Codificator/tree/main
+git clone https://github.com/andriiVIt/Ai-Codificator.git
 cd codeGenerator
 ```
 
