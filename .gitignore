@@ -6,3 +6,12 @@ TestPrompts/
 dbConnection/
 fullstack2025/
 
+
+# Ignore build and dependency files
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.db
+*.sqlite3
+
