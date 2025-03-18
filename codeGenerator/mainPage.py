@@ -4,7 +4,7 @@ from view.messageInput import InputMessage
 
 def main(page: ft.Page):
     page.title = "AI Code Generator"
-    page.bgcolor = "#1E1E2E"  # Dark background for a modern UI
+    page.bgcolor = "#1E1E2E" 
     page.padding = 20
     page.scroll = "adaptive"
     controllHeight=page.height-400
@@ -18,7 +18,6 @@ def main(page: ft.Page):
         height=100
     )
 
-    print(page.height)
     responseDisplay = ft.Column(
         alignment=ft.MainAxisAlignment.START,
         spacing=10,
@@ -34,7 +33,7 @@ def main(page: ft.Page):
     actions = ["/explain_code", "/generate_code", "/translate_code"]
 
 
-    # Input Section
+
     inputwidget = InputMessage(
         "Enter your code description...",
         languages,
@@ -53,7 +52,7 @@ def main(page: ft.Page):
         responseLayout.update()  
         page.update()
 
-    # Page Layout
+ 
     page.add(
         ft.Column(
             controls=[
@@ -68,5 +67,5 @@ def main(page: ft.Page):
         )
     )
 
-# Run the app
+
 ft.app(target=main)

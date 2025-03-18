@@ -7,6 +7,7 @@ from langchain.agents import initialize_agent, AgentType
 class CodeGenerator:
     def __init__(self):
         self.model = OllamaLLM(model="qwen2.5-coder:latest" , temperature=0) 
+       
         self.example_prompt = ChatPromptTemplate.from_template("""
         You are an expert software engineer. Generate well-structured, clean, and maintainable {language} code 
         based on the description provided. Use best practices, including SOLID principles, DRY, and KISS.
@@ -77,7 +78,7 @@ class CodeGenerator:
         )
 
     def generate_code_tool(self, inputs):
-        print(inputs + "printing inputs")
+   
         if isinstance(inputs, str):
             inputs = {"language": inputs, "description": inputs}
 
@@ -91,9 +92,7 @@ class CodeGenerator:
             "language": language,
             "description": description
         }
-      
         response = self.agent.invoke({"input": structured_input})
-        print(f"Response Type: {type(response)}") 
         return response
 
 
